@@ -58,6 +58,7 @@ def adam(x, dx, config=None):
   - v: Moving average of squared gradient.
   - t: Iteration number.
   """
+  assert x.shape==dx.shape
   if config is None: config = {}
   config.setdefault('learning_rate', 1e-3)
   config.setdefault('beta1', 0.9)

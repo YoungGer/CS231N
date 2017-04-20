@@ -152,6 +152,11 @@ class CaptioningSolver(object):
     for p, w in self.model.params.iteritems():
       dw = grads[p]
       config = self.optim_configs[p]
+      try:
+        assert w.shape==dw.shape
+      except:
+        print (p, w.shape, dw.shape)
+        raise Exception
       next_w, next_config = self.update_rule(w, dw, config)
       self.model.params[p] = next_w
       self.optim_configs[p] = next_config
