@@ -144,7 +144,13 @@ class CaptioningRNN(object):
     x, cache_embed = word_embedding_forward(captions_in, W_embed)
     # (3) rnn or lstm to process the sequence of input word vectors and produce hidden state vectors for all timestemps
     # -> (N,T,H)
-    h, cache_rnn = rnn_forward(x, h0, Wx, Wh, b)
+    if self.cell_type=="rnn":
+        h, cache_rnn = rnn_forward(x, h0, Wx, Wh, b)
+    elif self.cell_type=="lstm":
+        h, cache_lstm = lstm_forward(x, h0, Wx, Wh, b)
+    else:
+        raise Exception("wrong cell_type")
+
     # (4) affine transformation to compute scores over the vocabulary at every timestep using the hidden states
     # -> (N,T,V)
     s, cache_affine = temporal_affine_forward(h, W_vocab, b_vocab)
@@ -155,7 +161,12 @@ class CaptioningRNN(object):
     # (4)
     dh, dW_vocab, db_vocab = temporal_affine_backward(ds, cache_affine)
     # (3)
-    dx, dh0, dWx, dWh, db = rnn_backward(dh, cache_rnn)
+    if self.cell_type=="rnn":
+        dx, dh0, dWx, dWh, db = rnn_backward(dh, cache_rnn)
+    elif self.cell_type=="lstm":
+        dx, dh0, dWx, dWh, db = lstm_backward(dh, cache_lstm)
+    else:
+        raise Exception("wrong cell_type")
     # (2)
     dW_embed = word_embedding_backward(dx, cache_embed)
     # (1)
@@ -239,12 +250,19 @@ class CaptioningRNN(object):
     word_idx = self._start  # word_idx record the last word index
     # Enter into loop
     next_h = h0
+    next_c = np.zeros(next_h.shape)
     for i in range(max_length):
       prev_h = next_h
+      prev_c = next_c
       # (1) embed previous word using word embeding
       x = W_embed[word_idx]
       # (2) rnn step using input and hidden state to get next hidden state
-      next_h, _ = rnn_step_forward(x, prev_h, Wx, Wh, b)
+      if self.cell_type=="rnn":
+        next_h, _ = rnn_step_forward(x, prev_h, Wx, Wh, b)
+      elif self.cell_type=="lstm":
+        next_h, next_c, _ = lstm_step_forward(x, prev_h, prev_c, Wx, Wh, b)
+      else:
+        raise Exception("wrong cell_type")
       # (3) affine transform to the next_h state to get scores for all words in vocabulary
       s = next_h.dot(W_vocab) + b_vocab
       # (4) select the word with the highest score as the next word, write it to appropriate slot
