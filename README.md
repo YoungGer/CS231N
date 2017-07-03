@@ -2,7 +2,7 @@
 
 Here are my solutions for the course [CS231N: Convolutional Neural Networks for Visual Recognition (Winter 2016)](http://cs231n.stanford.edu/2016). I've learnt a lot about deep learning especially CNN through courses materials and finished all assignments. However, even though I've passed all tests in the assignments, I'm not sure all the codes are exactlly right and efficient. Therefore I'm pleased if anyone can find some problems in my code and let me know.
 
-Concreatlly, I've finished theres assignments:
+Concreatlly, I've finished these assignments:
 
 # Assignment 1
 
